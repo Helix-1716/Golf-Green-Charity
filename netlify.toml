@@ -4,8 +4,9 @@
 
 [build.environment]
   NODE_VERSION = "22"
-  # Clean up NPM flags to allow proper installation
   NPM_FLAGS = "--legacy-peer-deps"
+  # Omit server-only secrets from build scanning to prevent false positives in .next/server bundles
+  SECRETS_SCAN_OMIT_KEYS = "STRIPE_SECRET_KEY,SUPABASE_SERVICE_ROLE_KEY,STRIPE_WEBHOOK_SECRET"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
