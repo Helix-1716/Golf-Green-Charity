@@ -59,14 +59,7 @@ export default function AdminPage() {
                 </div>
              </div>
              <div className="flex gap-4">
-                <button className="px-6 py-3 rounded-2xl border border-slate-200 text-slate-400 font-bold text-xs hover:bg-slate-100 transition-all flex items-center gap-2">
-                   <Calendar className="w-4 h-4" />
-                   Last 30 Days
-                </button>
-                <div className="h-10 w-px bg-slate-200 mx-2" />
-                <button className="bg-brand-emerald text-white px-6 py-3 rounded-2xl font-bold text-xs shadow-lg hover:shadow-emerald-900/10 active:scale-95 flex items-center gap-2">
-                   Generate Report
-                </button>
+                {/* Section cleared per request */}
              </div>
           </div>
 

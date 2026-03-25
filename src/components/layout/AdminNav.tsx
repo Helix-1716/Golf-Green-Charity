@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase";
 import { 
   Trophy, 
   Users, 
@@ -27,6 +29,37 @@ const adminItems = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [admin, setAdmin] = useState<{ full_name: string } | null>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function getAdmin() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", user.id)
+          .single();
+        
+        setAdmin(data || { full_name: user.email?.split('@')[0] || "Admin" });
+      }
+    }
+    getAdmin();
+  }, []);
+
+  const handleLogout = async () => {
+    // 1. Clear Supabase auth (client side)
+    await supabase.auth.signOut();
+    
+    // 2. Clear our custom admin-session cookie (server side)
+    await fetch("/api/admin/logout", { method: "POST" });
+    
+    // 3. Kick out to login
+    router.push("/admin/login");
+    router.refresh();
+  };
 
   return (
     <aside className="w-80 bg-slate-900 flex flex-col pt-8 pb-10 px-8 h-screen sticky top-0 overflow-hidden md:flex hidden">
@@ -70,9 +103,13 @@ export function AdminSidebar() {
 
       {/* User Status */}
       <div className="mt-12 mb-8 p-5 bg-white/5 rounded-[2rem] border border-white/10 flex items-center gap-4 relative z-10">
-          <div className="w-12 h-12 rounded-[1rem] bg-brand-accent/20 flex items-center justify-center font-display font-black text-brand-accent">S</div>
+          <div className="w-12 h-12 rounded-[1rem] bg-brand-accent/20 flex items-center justify-center font-display font-black text-brand-accent lowercase italic">
+            {admin?.full_name?.[0] || "A"}
+          </div>
           <div>
-            <div className="font-black text-white text-sm leading-none mb-1">Super Admin</div>
+            <div className="font-black text-white text-sm leading-none mb-1 lowercase italic">
+               {admin?.full_name || "Accessing..."}
+            </div>
             <div className="text-[10px] uppercase font-bold text-emerald-400 tracking-widest flex items-center gap-1.5">
                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                Global Access
@@ -81,7 +118,10 @@ export function AdminSidebar() {
       </div>
 
       {/* Logout */}
-      <button className="flex items-center gap-4 p-4 rounded-2xl text-slate-500 font-bold hover:bg-white/5 hover:text-white transition-all relative z-10 group">
+      <button 
+        onClick={handleLogout}
+        className="flex items-center gap-4 p-4 rounded-2xl text-slate-500 font-bold hover:bg-white/5 hover:text-white transition-all relative z-10 group"
+      >
         <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
         <span className="text-sm">Logout Session</span>
       </button>

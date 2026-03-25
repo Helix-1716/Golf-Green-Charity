@@ -93,36 +93,45 @@ export function DashboardSidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 space-y-3">
-        {menuItems.map((item) => (
-          <Link
-            key={item.name}
-            href={item.href}
-            className={cn(
-              "flex items-center justify-between p-4 rounded-2xl font-bold transition-all group",
-              pathname === item.href 
-                ? "bg-brand-emerald text-white shadow-xl" 
-                : "text-slate-500 hover:bg-emerald-50 hover:text-brand-emerald"
-            )}
-          >
-            <div className="flex items-center gap-4">
-              <item.icon className="w-6 h-6" />
-              <span className="text-base tracking-tight">{item.name}</span>
-            </div>
-            {pathname !== item.href && (
-                <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-            )}
-          </Link>
-        ))}
+      <nav className="flex-1 space-y-2">
+        {menuItems.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                "flex items-center justify-between px-5 py-4 rounded-2xl font-bold transition-all duration-300 group relative",
+                isActive 
+                  ? "bg-brand-emerald text-white shadow-lg shadow-emerald-900/10" 
+                  : "text-slate-600 hover:bg-emerald-50/50 hover:text-brand-emerald"
+              )}
+            >
+              <div className="flex items-center gap-4">
+                <item.icon className={cn(
+                  "w-5 h-5 transition-transform duration-300",
+                  isActive ? "scale-110" : "group-hover:scale-110"
+                )} />
+                <span className="text-sm tracking-tight">{item.name}</span>
+              </div>
+              
+              {isActive ? (
+                <div className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
+              ) : (
+                <ChevronRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+              )}
+            </Link>
+          );
+        })}
       </nav>
 
       {/* Logout */}
-      <button className="flex items-center gap-4 p-4 rounded-2xl text-rose-500 font-bold hover:bg-rose-50 transition-all mt-6 group">
-        <div className="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center transition-colors group-hover:bg-rose-100">
-           <LogOut className="w-5 h-5" />
-        </div>
-        <span>Sign Out</span>
-      </button>
+      <div className="mt-8 pt-8 border-t border-slate-50 flex justify-center">
+        <button className="flex items-center gap-3 px-8 py-4 rounded-full bg-rose-50 text-rose-600 font-bold hover:bg-rose-100 transition-all group shadow-sm hover:shadow-md active:scale-[0.98] border border-rose-100/50">
+          <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+          <span className="text-sm tracking-tight">Sign Out</span>
+        </button>
+      </div>
     </aside>
   );
 }

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, Loader2, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Loader2, ArrowRight, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase";
@@ -29,10 +29,27 @@ export default function LoginPage() {
 
       if (error) throw error;
 
+      // Identify account role (check metadata first for resilience, then DB)
+      const isAdmin = data.user.user_metadata?.role === "admin";
+      
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", data.user.id)
+        .single();
+
+      if (isAdmin || profile?.role === "admin") {
+        await supabase.auth.signOut();
+        toast.error("Restricted Account", {
+          description: "This is an administrator account. Please use the Admin Portal.",
+        });
+        router.push("/admin/login");
+        return;
+      }
+
       toast.success("Welcome back!", {
         description: "Redirecting to your dashboard...",
       });
-      
       router.push("/dashboard");
     } catch (error: any) {
       toast.error("Auth Failure", {
@@ -105,10 +122,19 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <div className="mt-10 pt-8 border-t border-slate-50 text-center">
+      <div className="mt-10 pt-8 border-t border-slate-50 text-center space-y-4">
         <p className="text-slate-500 text-sm font-medium">
           New to Golf for Good? <Link href="/signup" className="text-brand-emerald font-black hover:underline ml-1">Join the Club</Link>
         </p>
+        <div className="flex justify-center">
+          <Link 
+            href="/admin/login" 
+            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-brand-emerald transition-colors p-2"
+          >
+            <ShieldCheck className="w-4 h-4" />
+            Admin Entrance
+          </Link>
+        </div>
       </div>
     </div>
   );
